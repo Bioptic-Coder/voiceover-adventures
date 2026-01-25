@@ -1,0 +1,378 @@
+/* Level-specific Styles */
+
+/* Level Select Grid */
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Level Card */
+.level-card {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.level-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.level-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.level-card.locked:hover {
+    transform: none;
+    border-color: var(--border-color);
+}
+
+.level-card.completed {
+    border-color: var(--accent-success);
+}
+
+.level-card-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.level-card.locked .level-card-number {
+    color: var(--text-muted);
+}
+
+.level-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.level-card-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.level-card-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.level-card-stars .star {
+    font-size: 1rem;
+}
+
+.level-card-lock {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+/* Level Layouts */
+
+/* Linear Layout - Level 1, 2 */
+.layout-linear {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Grid Layout - Level 2 */
+.layout-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+}
+
+/* Document Layout - Level 5, 6 */
+.layout-document {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+}
+
+.layout-document .game-element[data-type="heading"] {
+    width: 100%;
+    margin-top: var(--spacing-md);
+}
+
+.layout-document .game-element[data-type="text"] {
+    width: 100%;
+}
+
+/* Nested Layout - Level 4 */
+.layout-nested .game-element[data-type="group"] {
+    width: 100%;
+    flex-direction: column;
+}
+
+/* Table Layout - Level 9 */
+.game-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.game-table th,
+.game-table td {
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.game-table th {
+    background-color: var(--bg-tertiary);
+    font-weight: 600;
+}
+
+.game-table td {
+    background-color: var(--bg-element);
+}
+
+.game-table .vo-cursor {
+    background-color: var(--bg-tertiary);
+}
+
+/* Form Layout - Level 10 */
+.layout-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.form-row label {
+    min-width: 120px;
+    color: var(--text-secondary);
+}
+
+/* Level-specific element styles */
+
+/* Level 3 - Hidden content */
+.hidden-content {
+    background: linear-gradient(90deg,
+        var(--bg-element) 0%,
+        var(--bg-element) 40%,
+        transparent 50%,
+        var(--bg-element) 60%,
+        var(--bg-element) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hidden-content.revealed {
+    background: none;
+    -webkit-text-fill-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+/* Level 7 - Complex page */
+.layout-complex {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--spacing-md);
+    height: 100%;
+}
+
+.complex-header {
+    grid-column: 1 / -1;
+}
+
+.complex-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.complex-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.complex-footer {
+    grid-column: 1 / -1;
+}
+
+/* Progress indicators */
+.level-progress {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+}
+
+.level-progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--bg-tertiary);
+    transition: background-color var(--transition-fast);
+}
+
+.level-progress-dot.completed {
+    background-color: var(--accent-success);
+}
+
+.level-progress-dot.current {
+    background-color: var(--accent-primary);
+    animation: pulse-dot 1s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}
+
+/* Tutorial highlights */
+.tutorial-highlight {
+    position: relative;
+}
+
+.tutorial-highlight::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border: 2px dashed var(--accent-warning);
+    border-radius: var(--radius-lg);
+    animation: highlight-pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+/* Hint arrow */
+.hint-arrow {
+    position: absolute;
+    font-size: 2rem;
+    color: var(--accent-warning);
+    animation: bounce-arrow 1s ease-in-out infinite;
+    z-index: 10;
+}
+
+.hint-arrow.right {
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.hint-arrow.down {
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+}
+
+@keyframes bounce-arrow {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-50%) translateX(10px); }
+}
+
+/* Element type indicators */
+.element-type-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background-color: var(--accent-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+}
+
+/* Success animation */
+.success-burst {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.success-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: var(--accent-success);
+    border-radius: 50%;
+    animation: burst 0.6s ease-out forwards;
+}
+
+@keyframes burst {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Move counter */
+.move-counter {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+}
+
+.move-counter-label {
+    color: var(--text-muted);
+    margin-right: var(--spacing-sm);
+}
+
+.move-counter-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Timer */
+.game-timer {
+    position: absolute;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
