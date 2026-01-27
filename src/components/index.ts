@@ -9,3 +9,5 @@ export { SettingsModal } from './SettingsModal';
 export { LevelCompleteModal } from './LevelCompleteModal';
 export { Rotor } from './Rotor';
 export { QuickNavIndicator } from './QuickNavIndicator';
+export { BrowseModeIndicator } from './BrowseModeIndicator';
+export { ElementsList } from './ElementsList';

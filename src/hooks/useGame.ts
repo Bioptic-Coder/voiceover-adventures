@@ -1,29 +1,37 @@
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import type { LevelDef, LevelState, RotorState, VOCommand, LevelCompleteData } from '@/types';
+import type { LevelDef, LevelState, RotorState, VOCommand, LevelCompleteData, ElementsListState, ScreenReaderType } from '@/types';
 import { TOTAL_LEVELS, getLevel } from '@/data/levels';
 import * as storage from '@/lib/storage';
 import * as speech from '@/lib/speech';
 import * as keyboard from '@/lib/keyboard';
-import * as voiceover from '@/lib/voiceover';
+import * as navigation from '@/lib/navigation';
+import { setScreenReader, getAdapter } from '@/lib/screenreaders';
 
 interface GameHookState {
   currentLevelId: number;
   levelState: LevelState | null;
   announcement: string;
   rotorState: RotorState;
+  elementsListState: ElementsListState;
   quickNavEnabled: boolean;
+  browseMode: boolean;
+  screenReader: ScreenReaderType;
   levelComplete: LevelCompleteData | null;
   showHelp: boolean;
   showSettings: boolean;
 }
 
 export function useGame() {
+  const settings = storage.getSettings();
   const [state, setState] = useState<GameHookState>({
     currentLevelId: storage.getCurrentLevel(),
     levelState: null,
     announcement: 'Press any key to start',
     rotorState: { open: false },
+    elementsListState: { open: false },
     quickNavEnabled: false,
+    browseMode: settings.screenReader !== 'voiceover', // NVDA/Orca default to browse mode on
+    screenReader: settings.screenReader,
     levelComplete: null,
     showHelp: false,
     showSettings: false,
@@ -34,11 +42,16 @@ export function useGame() {
 
   // Initialize game
   useEffect(() => {
+    // Initialize screen reader from saved settings
+    const savedSettings = storage.getSettings();
+    setScreenReader(savedSettings.screenReader);
+    keyboard.setBrowseMode(savedSettings.screenReader !== 'voiceover');
+
     speech.init((text) => {
       setState((s) => ({ ...s, announcement: text }));
     });
 
-    voiceover.init({
+    navigation.init({
       onCursorMove: handleCursorMove,
       onActivate: handleActivate,
       onRotorChange: handleRotorChange,
@@ -49,9 +62,13 @@ export function useGame() {
     // Load initial level
     loadLevel(state.currentLevelId);
 
-    // Welcome message
+    // Welcome message based on screen reader
     setTimeout(() => {
-      speech.speak('Welcome to VoiceOver Adventures. Press Control Option Right Arrow to begin.');
+      const adapter = getAdapter();
+      const welcomeMsg = adapter.type === 'voiceover'
+        ? 'Welcome to VoiceOver Adventures. Press Control Option Right Arrow to begin.'
+        : `Welcome to Screen Reader Adventures. Press ${adapter.modifierDisplay} Right Arrow to begin, or use arrow keys in Browse Mode.`;
+      speech.speak(welcomeMsg);
     }, 500);
 
     return () => {
@@ -63,24 +80,33 @@ export function useGame() {
     const levelDef = getLevel(levelId);
     if (!levelDef) return;
 
-    voiceover.reset();
+    navigation.reset();
     keyboard.setQuickNav(false);
     keyboard.setRotorOpen(false);
+    keyboard.setElementsListOpen(false);
 
-    setState((s) => ({
-      ...s,
-      currentLevelId: levelId,
-      levelState: {
-        id: levelId,
-        def: levelDef,
-        moveCount: 0,
-        startTime: Date.now(),
-        completed: false,
-      },
-      levelComplete: null,
-      quickNavEnabled: false,
-      rotorState: { open: false },
-    }));
+    setState((s) => {
+      // NVDA/Orca default to browse mode on, VoiceOver defaults to off
+      const defaultBrowseMode = s.screenReader !== 'voiceover';
+      keyboard.setBrowseMode(defaultBrowseMode);
+
+      return {
+        ...s,
+        currentLevelId: levelId,
+        levelState: {
+          id: levelId,
+          def: levelDef,
+          moveCount: 0,
+          startTime: Date.now(),
+          completed: false,
+        },
+        levelComplete: null,
+        quickNavEnabled: false,
+        browseMode: defaultBrowseMode,
+        rotorState: { open: false },
+        elementsListState: { open: false },
+      };
+    });
 
     // Announce level after render
     setTimeout(() => {
@@ -90,12 +116,12 @@ export function useGame() {
 
   const handleElementsReady = useCallback((elements: HTMLElement[]) => {
     elementsRef.current = elements;
-    voiceover.setElements(elements);
+    navigation.setElements(elements);
 
     // Focus start element
     const startElement = elements.find((el) => el.classList.contains('start'));
     if (startElement) {
-      voiceover.moveTo(startElement);
+      navigation.moveTo(startElement);
     }
   }, []);
 
@@ -111,7 +137,7 @@ export function useGame() {
       }
 
       // Execute command
-      const result = voiceover.handleCommand(command);
+      const result = navigation.handleCommand(command);
 
       if (result && isMoveCommand(command)) {
         return {
@@ -124,8 +150,16 @@ export function useGame() {
         };
       }
 
+      // Handle Quick Nav toggle (VoiceOver)
       if (command === 'toggleQuickNav') {
         return { ...s, quickNavEnabled: !s.quickNavEnabled };
+      }
+
+      // Handle Browse Mode toggle (NVDA/Orca)
+      if (command === 'toggleBrowseMode') {
+        const newBrowseMode = !s.browseMode;
+        keyboard.setBrowseMode(newBrowseMode);
+        return { ...s, browseMode: newBrowseMode };
       }
 
       return s;
@@ -165,7 +199,43 @@ export function useGame() {
   }, []);
 
   const handleRotorChange = useCallback((rotorState: RotorState) => {
-    setState((s) => ({ ...s, rotorState }));
+    setState((s) => {
+      const adapter = getAdapter();
+      // For NVDA/Orca, also update elementsListState
+      if (adapter.features.hasElementsList) {
+        keyboard.setElementsListOpen(rotorState.open);
+        return {
+          ...s,
+          rotorState,
+          elementsListState: {
+            open: rotorState.open,
+            category: rotorState.category,
+            items: rotorState.items,
+            selectedIndex: rotorState.selectedIndex,
+          },
+        };
+      }
+      keyboard.setRotorOpen(rotorState.open);
+      return { ...s, rotorState };
+    });
+  }, []);
+
+  const handleScreenReaderChange = useCallback((type: ScreenReaderType) => {
+    setScreenReader(type);
+    const defaultBrowseMode = type !== 'voiceover';
+    keyboard.setBrowseMode(defaultBrowseMode);
+    keyboard.setQuickNav(false);
+    keyboard.setRotorOpen(false);
+    keyboard.setElementsListOpen(false);
+
+    setState((s) => ({
+      ...s,
+      screenReader: type,
+      browseMode: defaultBrowseMode,
+      quickNavEnabled: false,
+      rotorState: { open: false },
+      elementsListState: { open: false },
+    }));
   }, []);
 
   const completeLevel = (s: GameHookState): GameHookState => {
@@ -230,6 +300,7 @@ export function useGame() {
     gameAreaRef,
     loadLevel,
     handleElementsReady,
+    handleScreenReaderChange,
     replayLevel,
     nextLevel,
     setShowHelp,
@@ -265,6 +336,15 @@ function isCommandAllowed(command: VOCommand, allowedCommands: VOCommand[]): boo
     toggleQuickNav: 'toggleQuickNav',
     nextFormControl: 'nextFormControl',
     previousFormControl: 'previousFormControl',
+    // NVDA/Orca equivalents
+    toggleBrowseMode: 'toggleQuickNav', // Maps to toggleQuickNav permission
+    openElementsList: 'openRotor', // Maps to openRotor permission
+    elementsListNextCategory: 'openRotor',
+    elementsListPrevCategory: 'openRotor',
+    elementsListNextItem: 'openRotor',
+    elementsListPrevItem: 'openRotor',
+    elementsListSelect: 'openRotor',
+    elementsListClose: 'openRotor',
   };
 
   const requiredCommand = commandMap[command];
@@ -286,6 +366,7 @@ function isMoveCommand(command: VOCommand): boolean {
     'interact',
     'stopInteract',
     'rotorSelect',
+    'elementsListSelect', // NVDA/Orca equivalent
   ];
   return moveCommands.includes(command);
 }

@@ -14,8 +14,12 @@ export type ElementType =
   | 'image'
   | 'menu';
 
-// VoiceOver commands
-export type VOCommand =
+// Screen reader types
+export type ScreenReaderType = 'voiceover' | 'nvda' | 'orca';
+
+// Screen reader commands (superset of all screen reader commands)
+export type SRCommand =
+  // Navigation commands (shared)
   | 'moveNext'
   | 'movePrevious'
   | 'moveDown'
@@ -31,14 +35,29 @@ export type VOCommand =
   | 'previousLink'
   | 'nextFormControl'
   | 'previousFormControl'
-  | 'openRotor'
+  // VoiceOver Quick Nav
   | 'toggleQuickNav'
+  // VoiceOver Rotor
+  | 'openRotor'
   | 'rotorNextCategory'
   | 'rotorPrevCategory'
   | 'rotorNextItem'
   | 'rotorPrevItem'
   | 'rotorSelect'
-  | 'rotorClose';
+  | 'rotorClose'
+  // NVDA/Orca Browse Mode
+  | 'toggleBrowseMode'
+  // NVDA/Orca Elements List
+  | 'openElementsList'
+  | 'elementsListNextCategory'
+  | 'elementsListPrevCategory'
+  | 'elementsListNextItem'
+  | 'elementsListPrevItem'
+  | 'elementsListSelect'
+  | 'elementsListClose';
+
+// VOCommand is an alias for backward compatibility
+export type VOCommand = SRCommand;
 
 // Rotor categories
 export type RotorCategory = 'Headings' | 'Links' | 'Form Controls' | 'Tables' | 'Lists';
@@ -102,6 +121,7 @@ export interface GameSettings {
   speechRate: number;
   highContrast: boolean;
   volume: number;
+  screenReader: ScreenReaderType;
 }
 
 // Game stats
@@ -146,12 +166,21 @@ export interface RotorItem {
   type: ElementType;
 }
 
-// Rotor state
+// Rotor state (VoiceOver)
 export interface RotorState {
   open: boolean;
   category?: RotorCategory;
   items?: RotorItem[];
   selectedIndex?: number;
+}
+
+// Elements List state (NVDA/Orca)
+export interface ElementsListState {
+  open: boolean;
+  category?: RotorCategory;
+  items?: RotorItem[];
+  selectedIndex?: number;
+  filter?: string;
 }
 
 // Level complete data

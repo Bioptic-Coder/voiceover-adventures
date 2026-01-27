@@ -10,7 +10,10 @@ import {
   LevelCompleteModal,
   Rotor,
   QuickNavIndicator,
+  BrowseModeIndicator,
+  ElementsList,
 } from '@/components';
+import { getAdapter } from '@/lib/screenreaders';
 
 export function App() {
   const {
@@ -18,11 +21,15 @@ export function App() {
     levelState,
     announcement,
     rotorState,
+    elementsListState,
     quickNavEnabled,
+    browseMode,
+    screenReader,
     levelComplete,
     showHelp,
     showSettings,
     handleElementsReady,
+    handleScreenReaderChange,
     replayLevel,
     nextLevel,
     setShowHelp,
@@ -30,6 +37,8 @@ export function App() {
     dismissLevelComplete,
     totalLevels,
   } = useGame();
+
+  const adapter = getAdapter();
 
   if (!levelState) {
     return (
@@ -60,13 +69,20 @@ export function App() {
         commands={levelState.def.commands}
       />
 
-      <Rotor state={rotorState} />
+      {adapter.features.hasRotor && <Rotor state={rotorState} />}
+      {adapter.features.hasElementsList && <ElementsList state={elementsListState} />}
 
-      <QuickNavIndicator enabled={quickNavEnabled} />
+      {adapter.features.hasQuickNav && <QuickNavIndicator enabled={quickNavEnabled} />}
+      {adapter.features.hasBrowseMode && <BrowseModeIndicator enabled={browseMode} />}
 
-      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} screenReader={screenReader} />}
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          onScreenReaderChange={handleScreenReaderChange}
+        />
+      )}
 
       {levelComplete && (
         <LevelCompleteModal

@@ -429,7 +429,7 @@ export function rotorSelect(): boolean {
 }
 
 export function handleCommand(command: VOCommand): boolean {
-  const handlers: Record<VOCommand, () => boolean> = {
+  const handlers: Partial<Record<VOCommand, () => boolean>> = {
     moveNext,
     movePrevious,
     moveDown,
@@ -453,10 +453,26 @@ export function handleCommand(command: VOCommand): boolean {
     rotorPrevItem,
     rotorSelect,
     rotorClose: closeRotor,
+    // NVDA/Orca browse mode toggle maps to toggleQuickNav internally
+    toggleBrowseMode: toggleBrowseMode,
+    // NVDA/Orca elements list maps to rotor internally
+    openElementsList: openRotor,
+    elementsListNextCategory: rotorNextCategory,
+    elementsListPrevCategory: rotorPrevCategory,
+    elementsListNextItem: rotorNextItem,
+    elementsListPrevItem: rotorPrevItem,
+    elementsListSelect: rotorSelect,
+    elementsListClose: closeRotor,
   };
 
   const handler = handlers[command];
   return handler ? handler() : false;
+}
+
+export function toggleBrowseMode(): boolean {
+  // Toggle browse mode (NVDA/Orca equivalent of Quick Nav)
+  // For the game simulation, we treat it like Quick Nav
+  return toggleQuickNav();
 }
 
 export function getCurrentElement(): HTMLElement | null {

@@ -2,12 +2,15 @@ import { useState, useEffect } from 'preact/hooks';
 import { Modal } from './Modal';
 import * as storage from '@/lib/storage';
 import * as speech from '@/lib/speech';
+import { setScreenReader, getAllAdapters } from '@/lib/screenreaders';
+import type { ScreenReaderType } from '@/types';
 
 interface SettingsModalProps {
   onClose: () => void;
+  onScreenReaderChange?: (type: ScreenReaderType) => void;
 }
 
-export function SettingsModal({ onClose }: SettingsModalProps) {
+export function SettingsModal({ onClose, onScreenReaderChange }: SettingsModalProps) {
   const [settings, setSettings] = useState(storage.getSettings());
 
   useEffect(() => {
@@ -30,6 +33,14 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     const highContrast = (e.target as HTMLInputElement).checked;
     storage.saveSettings({ highContrast });
     setSettings((s) => ({ ...s, highContrast }));
+  };
+
+  const handleScreenReaderChange = (e: Event) => {
+    const screenReader = (e.target as HTMLSelectElement).value as ScreenReaderType;
+    storage.saveSettings({ screenReader });
+    setScreenReader(screenReader);
+    setSettings((s) => ({ ...s, screenReader }));
+    onScreenReaderChange?.(screenReader);
   };
 
   const handleReset = () => {
@@ -73,6 +84,21 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           checked={settings.highContrast}
           onChange={handleHighContrastChange}
         />
+      </div>
+
+      <div class="setting-group">
+        <label for="screen-reader">Screen Reader Mode</label>
+        <select
+          id="screen-reader"
+          value={settings.screenReader}
+          onChange={handleScreenReaderChange}
+        >
+          {getAllAdapters().map((adapter) => (
+            <option key={adapter.type} value={adapter.type}>
+              {adapter.name} ({adapter.platform})
+            </option>
+          ))}
+        </select>
       </div>
 
       <div class="setting-group">

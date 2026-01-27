@@ -11,6 +11,7 @@ const defaultData: StoredData = {
     speechRate: 1.0,
     highContrast: false,
     volume: 1.0,
+    screenReader: 'voiceover',
   },
   stats: {
     totalMoves: 0,
