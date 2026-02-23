@@ -1,5 +1,6 @@
 import type { SpeakOptions, ElementType } from '@/types';
 import * as storage from './storage';
+import * as audio from './audio';
 
 let synth: SpeechSynthesis | null = null;
 let voice: SpeechSynthesisVoice | null = null;
@@ -68,6 +69,9 @@ export function init(announceCallback?: (text: string) => void): void {
   enabled = settings.speechEnabled;
   rate = settings.speechRate;
   volume = settings.volume;
+  
+  audio.init();
+  audio.setSoundEnabled(enabled);
 }
 
 export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
@@ -158,6 +162,7 @@ export function announceElement(element: HTMLElement | null): string {
 
   const announcement = parts.join(', ');
   speak(announcement, { interrupt: true });
+  audio.playMove();
 
   return announcement;
 }
@@ -165,6 +170,25 @@ export function announceElement(element: HTMLElement | null): string {
 export function announceAction(action: string): void {
   const text = ACTION_ANNOUNCEMENTS[action] || action;
   speak(text, { interrupt: true });
+
+  switch (action) {
+    case 'boundary':
+      audio.playBoundary();
+      break;
+    case 'interact':
+      audio.playInteractIn();
+      break;
+    case 'stopInteract':
+      audio.playInteractOut();
+      break;
+    case 'activate':
+    case 'toggle':
+      audio.playActivate();
+      break;
+    case 'level-complete':
+      audio.playSuccess();
+      break;
+  }
 }
 
 export function announceReading(elements: HTMLElement[]): void {
@@ -180,6 +204,7 @@ export function announceReading(elements: HTMLElement[]): void {
 export function setEnabled(value: boolean): void {
   enabled = value;
   storage.saveSettings({ speechEnabled: value });
+  audio.setSoundEnabled(value);
 }
 
 export function setRate(value: number): void {
@@ -190,6 +215,7 @@ export function setRate(value: number): void {
 export function setVolume(value: number): void {
   volume = value;
   storage.saveSettings({ volume: value });
+  audio.setVolume(value);
 }
 
 export function isEnabled(): boolean {

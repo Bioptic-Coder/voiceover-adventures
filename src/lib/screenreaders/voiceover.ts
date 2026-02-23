@@ -98,7 +98,8 @@ function parseVOCommand(event: KeyboardEvent): SRCommand | null {
   if (event.shiftKey) commandKey += '+shift';
   if (event.metaKey) commandKey += '+cmd';
 
-  const key = event.key.toLowerCase();
+  const rawKey = event.key;
+  const key = KEY_CODES[rawKey] || KEY_CODES[event.code] || rawKey.toLowerCase();
   commandKey += `+${key}`;
 
   return VO_COMMANDS[commandKey] || null;

@@ -3,6 +3,7 @@ import type { LevelDef, LevelState, RotorState, VOCommand, LevelCompleteData, El
 import { TOTAL_LEVELS, getLevel } from '@/data/levels';
 import * as storage from '@/lib/storage';
 import * as speech from '@/lib/speech';
+import * as audio from '@/lib/audio';
 import * as keyboard from '@/lib/keyboard';
 import * as navigation from '@/lib/navigation';
 import { setScreenReader, getAdapter } from '@/lib/screenreaders';
@@ -64,6 +65,7 @@ export function useGame() {
 
     // Welcome message based on screen reader
     setTimeout(() => {
+      audio.init(); // Initialize audio context upon welcome message
       const adapter = getAdapter();
       const welcomeMsg = adapter.type === 'voiceover'
         ? 'Welcome to VoiceOver Adventures. Press Control Option Right Arrow to begin.'
@@ -133,6 +135,7 @@ export function useGame() {
       const allowedCommands = s.levelState.def.commands;
       if (!isCommandAllowed(command, allowedCommands)) {
         speech.speak('Command not available in this level');
+        audio.playBoundary();
         return s;
       }
 

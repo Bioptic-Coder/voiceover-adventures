@@ -1,5 +1,6 @@
 import type { VOCommand, CommandInfo } from '@/types';
 import { getAdapter, getCommandInfo as getAdapterCommandInfo } from './screenreaders';
+import * as audio from './audio';
 import type { SRState } from './screenreaders';
 import { handleNVDAKeyUp } from './screenreaders/nvda';
 import { handleOrcaKeyUp } from './screenreaders/orca';
@@ -33,6 +34,9 @@ function handleKeyDown(event: KeyboardEvent): void {
     event.preventDefault();
     event.stopPropagation();
     onCommand?.(command, event);
+  } else if (event.ctrlKey && event.altKey) {
+    // If VO modifiers are held but command is invalid, play bonk
+    audio.playBoundary();
   }
 }
 

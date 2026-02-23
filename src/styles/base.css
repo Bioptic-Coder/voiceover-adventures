@@ -1,27 +1,27 @@
 /* Base Styles - VoiceOver Adventures */
 
 :root {
-    /* Color Palette - Dark Theme */
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #16213e;
-    --bg-tertiary: #0f3460;
-    --bg-element: #1f4068;
+    /* Color Palette - Dark Fantasy / Retro Theme */
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121c;
+    --bg-tertiary: #1f1f2e;
+    --bg-element: #2a2a3e;
 
-    --text-primary: #eaeaea;
-    --text-secondary: #b8b8b8;
-    --text-muted: #6c6c6c;
+    --text-primary: #e0e0ff;
+    --text-secondary: #a0a0c0;
+    --text-muted: #606080;
 
-    --accent-primary: #e94560;
-    --accent-secondary: #0f4c75;
-    --accent-success: #00d26a;
-    --accent-warning: #ffc93c;
-    --accent-info: #00b8d9;
+    --accent-primary: #ff3366; /* Neon Red-Pink */
+    --accent-secondary: #00f0ff; /* Neon Cyan */
+    --accent-success: #00ffaa;
+    --accent-warning: #ffaa00;
+    --accent-info: #00f0ff;
 
-    --vo-cursor: #e94560;
-    --vo-cursor-glow: rgba(233, 69, 96, 0.4);
+    --vo-cursor: #00f0ff;
+    --vo-cursor-glow: rgba(0, 240, 255, 0.6);
 
-    --border-color: #2a2a4a;
-    --shadow-color: rgba(0, 0, 0, 0.3);
+    --border-color: #3a3a5a;
+    --shadow-color: rgba(0, 0, 0, 0.6);
 
     /* Typography */
     --font-primary: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
